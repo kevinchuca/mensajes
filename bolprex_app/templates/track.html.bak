@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Rastrear envío</h3>
+
+<form method="post" action="{{ url_for('main.track') }}" class="mb-3 d-flex gap-2">
+  <input type="text" name="query" class="form-control" placeholder="Ingrese número de guía o código de rastreo" required value="{{ request.form.get('query', request.args.get('code','')) }}">
+  <button class="btn btn-primary">Buscar</button>
+</form>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ 'warning' if category=='warning' else 'info' }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% if shipment %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Envío encontrado</h5>
+      <p><strong>Número de guía:</strong> {{ shipment.numero_guia }}</p>
+      <p><strong>Código de rastreo:</strong> {{ shipment.tracking_code }}</p>
+      <p><strong>Remitente:</strong> {{ shipment.sender_name }}</p>
+      <p><strong>Destinatario:</strong> {{ shipment.recipient_name }}</p>
+      <p><strong>Estado:</strong> {{ shipment.status }}</p>
+    </div>
+  </div>
+{% elif request.method == 'POST' %}
+  <p>No se encontró ningún envío con ese número de guía o código de rastreo.</p>
+{% endif %}
+
+{% endblock %}

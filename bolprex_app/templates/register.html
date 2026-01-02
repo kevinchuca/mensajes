@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Crear usuario</h3>
+<form method="post">
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label>Nombre</label>
+      <input class="form-control" name="name" required>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label>Email</label>
+      <input type="email" class="form-control" name="email" required>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label>Contraseña</label>
+      <input type="password" class="form-control" name="password" required>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label>Rol</label>
+      <select name="role" class="form-select">
+        {% for r in roles %}<option value="{{ r }}">{{ r|capitalize }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label>Ciudad</label>
+      <select name="city" class="form-select">
+        {% for c in cities %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-success">Crear</button>
+</form>
+{% endblock %}

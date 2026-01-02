@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center">
+  <h1 class="mb-3">Sistema de Courier - BOLPREX</h1>
+  <p class="lead">Consulta de envíos y gestión para administrador, mensajero y cliente.</p>
+  <form class="row g-2 justify-content-center" action="{{ url_for('main.track') }}" method="get">
+    <div class="col-auto">
+      <input type="text" name="code" placeholder="Código de seguimiento" class="form-control" required>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary">Rastrear</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

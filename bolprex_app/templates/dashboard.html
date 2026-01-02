@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Dashboard ({{ current_user.role|capitalize }})</h3>
+<form class="mb-3 d-flex gap-2" method="get" action="{{ url_for('main.dashboard') }}">
+  <input class="form-control" style="max-width:260px" name="numero_guia" placeholder="Buscar por número de guía" value="{{ request.args.get('numero_guia', '') }}">
+  <button class="btn btn-outline-secondary">Buscar</button>
+</form>
+<div class="mb-3 d-flex gap-2">
+  {% if current_user.role == 'admin' %}
+    <a class="btn btn-outline-primary" href="{{ url_for('auth.register') }}">Nuevo usuario</a>
+  {% endif %}
+  {% if current_user.role in ['admin','mensajero'] %}
+    <a class="btn btn-primary" href="{{ url_for('main.new_shipment') }}">Nuevo envío</a>
+  {% endif %}
+  {% if current_user.role == 'admin' %}
+    <a class="btn btn-secondary" href="{{ url_for('reports.shipments_pdf') }}">Exportar PDF (envíos)</a>
+  {% endif %}
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Número de guía</th>
+      <th>Código seguimiento</th>
+      <th>Cliente</th>
+      <th>Mensajero</th>
+      <th>Destino</th>
+      <th>Estado</th>
+      <th>Creado</th>
+      <th>Acciones</th>
+    </tr>
+    <tr>
+      
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in shipments %}
+    <tr>
+      <td>{{ s.numero_guia }}</td>
+      <td>{{ s.tracking_code }}</td>
+      <td>{{ s.client.name if s.client else '-' }}</td>
+      <td>{{ s.messenger.name if s.messenger else '-' }}</td>
+      <td>{{ s.destination_city }}</td>
+      <td>{{ s.status }}</td>
+      <td>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td class="d-flex gap-1">
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('ship.detail', shipment_id=s.id) }}">Ver</a>
+        {% if current_user.role == 'admin' %}
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.edit_shipment', shipment_id=s.id) }}">Editar</a>
+        <form method="post" action="{{ url_for('main.delete_shipment', shipment_id=s.id) }}" onsubmit="return confirm('¿Eliminar envío?')">
+          <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

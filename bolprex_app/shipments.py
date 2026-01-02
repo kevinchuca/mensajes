@@ -1,0 +1,54 @@
+import os
+from datetime import datetime
+import pytz
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
+from .models import Shipment
+from . import db
+from config import Config
+
+ship_bp = Blueprint("ship", __name__, url_prefix="/shipments")
+
+@ship_bp.get("/<int:shipment_id>")
+@login_required
+def detail(shipment_id):
+    s = Shipment.query.get_or_404(shipment_id)
+    return render_template("shipment_detail.html", s=s)
+
+@ship_bp.post("/<int:shipment_id>/status")
+@login_required
+def update_status(shipment_id):
+    s = Shipment.query.get_or_404(shipment_id)
+    new_status = request.form.get("status", "PENDIENTE")
+    s.status = new_status
+    db.session.commit()
+    flash("Estado actualizado.", "success")
+    return redirect(url_for("ship.detail", shipment_id=shipment_id))
+
+@ship_bp.post("/<int:shipment_id>/upload")
+@login_required
+def upload_delivery_photo(shipment_id):
+    s = Shipment.query.get_or_404(shipment_id)
+    if "photo" not in request.files:
+        flash("No se envió archivo.", "warning")
+        return redirect(url_for("ship.detail", shipment_id=shipment_id))
+    file = request.files["photo"]
+    if file.filename == "":
+        flash("Archivo vacío.", "warning")
+        return redirect(url_for("ship.detail", shipment_id=shipment_id))
+    if file and Config.ALLOWED_EXTENSIONS and file.filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS:
+        filename = secure_filename(f"{s.tracking_code}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.', 1)[1].lower()}")
+        save_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+        file.save(save_path)
+        s.delivered_photo = f"uploads/{filename}"
+        s.status = "ENTREGADO"
+        # Guardar fecha/hora en zona horaria Bolivia (America/La_Paz)
+        tz = pytz.timezone('America/La_Paz')
+        s.delivered_at = datetime.now(tz)
+        db.session.commit()
+        flash("Foto subida y entrega marcada como ENTREGADO.", "success")
+        return redirect(url_for("ship.detail", shipment_id=shipment_id))
+    else:
+        flash("Formato no permitido. Usa png/jpg/jpeg/gif.", "danger")
+        return redirect(url_for("ship.detail", shipment_id=shipment_id))

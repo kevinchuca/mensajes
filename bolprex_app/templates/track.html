@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Rastrear envío</h3>
+
+<form method="post" action="{{ url_for('main.track') }}" class="mb-3 d-flex gap-2">
+  <input type="text" name="query" class="form-control" placeholder="Ingrese número de guía o código de rastreo" required value="{{ request.form.get('query', request.args.get('code','')) }}">
+  <button class="btn btn-primary">Buscar</button>
+</form>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ 'warning' if category=='warning' else 'info' }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% if shipment %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Envío encontrado</h5>
+      <p><strong>Número de guía:</strong> {{ shipment.numero_guia }}</p>
+      <p><strong>Código de rastreo:</strong> {{ shipment.tracking_code }}</p>
+      <p><strong>Remitente:</strong> {{ shipment.sender_name }}</p>
+      <p><strong>Destinatario:</strong> {{ shipment.recipient_name }}</p>
+      <p><strong>Estado:</strong> {{ shipment.status }}</p>
+      {% if shipment.status == 'ENTREGADO' %}
+        <p>🟢 Su envío fue entregado correctamente.</p>
+        {% if shipment.delivered_at %}
+          <p>📅 Entregado el {{ shipment.delivered_at.strftime("%d/%m/%Y %H:%M") }}</p>
+        {% endif %}
+      {% else %}
+        <p>🔴 Su envío aún no ha sido entregado.</p>
+      {% endif %}
+      <h5 class="mt-3">Foto de la entrega:</h5>
+      {% if shipment.delivered_photo %}
+        <img src="{{ url_for('static', filename=shipment.delivered_photo) }}" alt="Foto de entrega" class="img-fluid" style="max-width:400px;">
+      {% else %}
+        <p>No hay foto de entrega disponible.</p>
+      {% endif %}
+    
+    </div>
+  </div>
+{% elif request.method == 'POST' %}
+  <p>No se encontró ningún envío con ese número de guía o código de rastreo.</p>
+{% endif %}
+
+{% endblock %}
