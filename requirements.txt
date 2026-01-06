@@ -6,3 +6,4 @@ flask-login
 flask-migrate
 python-dotenv
 pytz
+flask-jwt-extended
