@@ -1,15 +1,8 @@
-from flask import Flask
+from bolprex_app import create_app
 
-
-
-
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "🚀 BOLPREX SRL - Sistema Flask listo para Render"
+app = create_app()
 
 if __name__ == "__main__":
-    pass
+    app.run()
 
 # Cambio para forzar el despliegue 1.0
