@@ -11,9 +11,15 @@
       <li class="list-group-item"><strong>Dirección:</strong> {{ s.address }}</li>
       <li class="list-group-item"><strong>Estado:</strong> {{ s.status }}</li>
       <li class="list-group-item"><strong>Notas:</strong> {{ s.notes or '-' }}</li>
-      <li class="list-group-item"><strong>Cliente:</strong> {{ s.client.name if s.client else '-' }}</li>
+      
+      <li class="list-group-item">
+          <strong>Cliente:</strong> 
+          {{ s.client_name if s.client_name else (s.client.name if s.client else '-') }}
+      </li>
+      
       <li class="list-group-item"><strong>Mensajero:</strong> {{ s.messenger.name if s.messenger else '-' }}</li>
     </ul>
+
     <form method="post" action="{{ url_for('ship.update_status', shipment_id=s.id) }}" class="d-flex gap-2">
       <select name="status" class="form-select" style="max-width:200px">
         {% for st in ['PENDIENTE','EN RUTA','ENTREGADO','NO_ENTREGADO'] %}
@@ -23,17 +29,35 @@
       <button class="btn btn-outline-primary">Actualizar estado</button>
     </form>
   </div>
+
   <div class="col-md-6">
     <h5>Prueba de entrega</h5>
+    
     {% if s.delivered_photo %}
-      <img src="{{ url_for('static', filename=s.delivered_photo) }}" class="img-fluid rounded border mb-2">
-      <p><small>Entregado: {{ s.delivered_at.strftime('%Y-%m-%d %H:%M') if s.delivered_at else '-' }}</small></p>
+        <div class="mb-3">
+            <img src="{{ s.delivered_photo if 'http' in s.delivered_photo else url_for('static', filename=s.delivered_photo) }}" 
+                 alt="Prueba de entrega" 
+                 class="img-fluid rounded shadow-sm border" 
+                 style="max-width: 100%;">
+        </div>
+        <p class="text-muted">
+            <i class="fas fa-calendar-check"></i> 
+            Entregado el: {{ s.delivered_at.strftime('%d/%m/%Y %H:%M') if s.delivered_at else 'Fecha no registrada' }}
+        </p>
     {% else %}
-      <p>Aún no hay foto subida.</p>
+        <div class="alert alert-light border">
+            <p class="mb-0 text-muted">No hay prueba de entrega subida todavía.</p>
+        </div>
     {% endif %}
+
+    <hr>
+    
     <form method="post" action="{{ url_for('ship.upload_delivery_photo', shipment_id=s.id) }}" enctype="multipart/form-data">
-      <input type="file" name="photo" accept="image/*" class="form-control mb-2" required>
-      <button class="btn btn-success">Subir foto y marcar ENTREGADO</button>
+      <div class="mb-2">
+          <label class="form-label small text-muted">Seleccionar imagen:</label>
+          <input type="file" name="photo" accept="image/*" class="form-control" required>
+      </div>
+      <button class="btn btn-success w-100">Subir foto y marcar ENTREGADO</button>
     </form>
   </div>
 </div>
