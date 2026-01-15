@@ -90,17 +90,6 @@ def shipment_detail(shipment_id):
     s = Shipment.query.get_or_404(shipment_id)
     return render_template("shipment_detail.html", s=s)
 
-@main_bp.post("/shipments/<int:shipment_id>/update_status")
-@login_required
-def update_status(shipment_id):
-    s = Shipment.query.get_or_404(shipment_id)
-    new_status = request.form.get("status")
-    if new_status:
-        s.status = new_status
-        db.session.commit()
-        flash("Estado actualizado.", "success")
-    return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
-
 @main_bp.post("/shipments/<int:shipment_id>/upload_photo")
 @login_required
 def upload_photo(shipment_id):
@@ -109,7 +98,7 @@ def upload_photo(shipment_id):
     
     file = request.files.get('file')
     if not file or file.filename == '':
-        flash("Archivo no válido.", "warning")
+        flash("No se seleccionó archivo.", "warning")
         return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
 
     try:
@@ -119,8 +108,6 @@ def upload_photo(shipment_id):
             s.status = "ENTREGADO"
             db.session.commit()
             flash("Entregado con éxito.", "success")
-        else:
-            flash("Error en Cloudinary.", "danger")
     except Exception as e:
         db.session.rollback()
         flash(f"Error: {str(e)}", "danger")
