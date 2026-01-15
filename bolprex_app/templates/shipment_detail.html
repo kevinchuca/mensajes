@@ -20,7 +20,8 @@
       <li class="list-group-item"><strong>Mensajero:</strong> {{ s.messenger.name if s.messenger else '-' }}</li>
     </ul>
 
-    <form method="post" action="{{ url_for('shipments.update_status', shipment_id=s.id) }}" class="d-flex gap-2">
+    
+    <form method="post" action="{{ url_for('main.update_shipment', shipment_id=s.id) }}" class="d-flex gap-2">
       <select name="status" class="form-select" style="max-width:200px">
         {% for st in ['PENDIENTE','EN RUTA','ENTREGADO','NO_ENTREGADO'] %}
           <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
