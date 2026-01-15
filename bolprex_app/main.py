@@ -107,12 +107,8 @@ def upload_photo(shipment_id):
     from .utils import upload_image_to_cloudinary
     s = Shipment.query.get_or_404(shipment_id)
     
-    if 'file' not in request.files:
-        flash("No se seleccionó archivo.", "warning")
-        return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
-    
-    file = request.files['file']
-    if file.filename == '':
+    file = request.files.get('file')
+    if not file or file.filename == '':
         flash("Archivo no válido.", "warning")
         return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
 
@@ -123,6 +119,8 @@ def upload_photo(shipment_id):
             s.status = "ENTREGADO"
             db.session.commit()
             flash("Entregado con éxito.", "success")
+        else:
+            flash("Error en Cloudinary.", "danger")
     except Exception as e:
         db.session.rollback()
         flash(f"Error: {str(e)}", "danger")
