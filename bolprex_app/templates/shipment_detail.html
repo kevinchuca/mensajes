@@ -21,7 +21,7 @@
     </ul>
 
     
-    <form method="post" action="{{ url_for('main.update_shipment', shipment_id=s.id) }}" class="d-flex gap-2">
+    <form method="post" action="{{ url_for('main.update_shipment', shipment_id=s.id) }}">
       <select name="status" class="form-select" style="max-width:200px">
         {% for st in ['PENDIENTE','EN RUTA','ENTREGADO','NO_ENTREGADO'] %}
           <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
@@ -54,7 +54,7 @@
     <hr>
     
   
-<form method="post" action="{{ url_for('main.upload_photo', shipment_id=s.id) }}" enctype="multipart/form-data">  
+<form method="post" action="{{ url_for('main.upload_photo', shipment_id=s.id) }}" enctype="multipart/form-data">
     <input type="file" name="file" class="form-control" required>
     <button type="submit" class="btn btn-success">Subir foto y marcar ENTREGADO</button>
 </form>
