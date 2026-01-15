@@ -45,11 +45,7 @@ def create_shipment():
 
     from .utils import generate_tracking_code
     tracking_code = generate_tracking_code()
-
     ng = request.form.get("numero_guia", "").strip()
-    if not ng:
-        flash("El número de guía es obligatorio.", "danger")
-        return redirect(url_for("main.new_shipment"))
     
     if Shipment.query.filter_by(numero_guia=ng).first():
         flash("El número de guía ya existe.", "danger")
@@ -70,8 +66,35 @@ def create_shipment():
     )
     db.session.add(s)
     db.session.commit()
-    flash(f"Envío creado. Código: {tracking_code}", "success")
+    flash(f"Envío creado: {tracking_code}", "success")
     return redirect(url_for("main.dashboard"))
+
+# --- RUTAS DE EDICIÓN (ESTO ES LO QUE FALTA) ---
+
+@main_bp.get("/shipments/<int:shipment_id>/edit")
+@login_required
+def edit_shipment(shipment_id):
+    if current_user.role != "admin":
+        flash("Solo administradores.", "warning")
+        return redirect(url_for("main.dashboard"))
+    s = Shipment.query.get_or_404(shipment_id)
+    return render_template("edit_shipment.html", s=s)
+
+@main_bp.post("/shipments/<int:shipment_id>/update")
+@login_required
+def update_shipment(shipment_id):
+    if current_user.role != "admin":
+        flash("No autorizado.", "warning")
+        return redirect(url_for("main.dashboard"))
+    s = Shipment.query.get_or_404(shipment_id)
+    s.sender_name = request.form.get("sender_name")
+    s.recipient_name = request.form.get("recipient_name")
+    s.notes = request.form.get("notes")
+    db.session.commit()
+    flash("Envío actualizado.", "success")
+    return redirect(url_for("main.dashboard"))
+
+# --- FIN RUTAS DE EDICIÓN ---
 
 @main_bp.route("/track", methods=["GET", "POST"])
 def track():
@@ -80,8 +103,6 @@ def track():
     if query:
         from sqlalchemy import or_
         shipment = Shipment.query.filter(or_(Shipment.numero_guia == query.strip(), Shipment.tracking_code == query.strip())).first()
-        if not shipment:
-            flash("No se encontró el envío.", "warning")
     return render_template("track.html", shipment=shipment)
 
 @main_bp.get("/shipments/<int:shipment_id>")
@@ -95,33 +116,22 @@ def shipment_detail(shipment_id):
 def upload_photo(shipment_id):
     from .utils import upload_image_to_cloudinary
     s = Shipment.query.get_or_404(shipment_id)
-    
     file = request.files.get('file')
-    if not file or file.filename == '':
-        flash("No se seleccionó archivo.", "warning")
-        return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
-
-    try:
-        image_url = upload_image_to_cloudinary(file)
-        if image_url:
-            s.photo_url = image_url
+    if file:
+        url = upload_image_to_cloudinary(file)
+        if url:
+            s.photo_url = url
             s.status = "ENTREGADO"
             db.session.commit()
-            flash("Entregado con éxito.", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Error: {str(e)}", "danger")
-    
+            flash("Foto subida.", "success")
     return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
 
 @main_bp.post("/shipments/<int:shipment_id>/delete")
 @login_required
 def delete_shipment(shipment_id):
-    if current_user.role != "admin":
-        flash("No autorizado.", "warning")
-        return redirect(url_for("main.dashboard"))
-    s = Shipment.query.get_or_404(shipment_id)
-    db.session.delete(s)
-    db.session.commit()
-    flash("Envío eliminado.", "success")
+    if current_user.role == "admin":
+        s = Shipment.query.get_or_404(shipment_id)
+        db.session.delete(s)
+        db.session.commit()
+        flash("Eliminado.", "success")
     return redirect(url_for("main.dashboard"))
