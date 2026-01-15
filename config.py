@@ -6,8 +6,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-# ¡ESTA PARTE ES LA QUE FALTA! 
-# Sin esto, Cloudinary no sabe qué llaves usar y da error 500
+# 1. ACTIVACIÓN DE CLOUDINARY (Faltaba esto para evitar el Error 500)
 cloudinary.config( 
     cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'), 
     api_key = os.getenv('CLOUDINARY_API_KEY'), 
@@ -18,7 +17,7 @@ cloudinary.config(
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-key")
     
-    # Arreglo para la URL de la base de datos de Render
+    # 2. CORRECCIÓN DE LA URL DE BASE DE DATOS PARA RENDER
     db_url = os.getenv("DATABASE_URL")
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
