@@ -1,5 +1,11 @@
-import random, string
-def generate_tracking_code():
-    prefix = "BX"
-    code = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
-    return f"{prefix}-{code}"
+import cloudinary
+import cloudinary.uploader
+
+def upload_image_to_cloudinary(file):
+    try:
+        # Forzamos la subida a Cloudinary
+        upload_result = cloudinary.uploader.upload(file)
+        return upload_result.get("secure_url")
+    except Exception as e:
+        print(f"Error en Cloudinary: {e}")
+        return None

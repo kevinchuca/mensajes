@@ -54,9 +54,12 @@
     <hr>
     
   
-<form method="post" action="{{ url_for('main.upload_photo', shipment_id=s.id) }}" enctype="multipart/form-data">
-    <input type="file" name="file" class="form-control" required>
-    <button type="submit" class="btn btn-success">Subir foto y marcar ENTREGADO</button>
+  <form action="{{ url_for('main.upload_photo', shipment_id=s.id) }}" method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label class="form-label">Seleccionar imagen:</label>
+        <input type="file" name="file" class="form-control" accept="image/*" required>
+    </div>
+    <button type="submit" class="btn btn-success w-100">Subir foto y marcar ENTREGADO</button>
 </form>
   </div>
 </div>
