@@ -20,30 +20,29 @@
       <li class="list-group-item"><strong>Mensajero:</strong> {{ s.messenger.name if s.messenger else '-' }}</li>
     </ul>
 
-    
     <form method="post" action="{{ url_for('main.update_shipment', shipment_id=s.id) }}">
       <select name="status" class="form-select" style="max-width:200px">
         {% for st in ['PENDIENTE','EN RUTA','ENTREGADO','NO_ENTREGADO'] %}
           <option value="{{ st }}" {% if s.status == st %}selected{% endif %}>{{ st }}</option>
         {% endfor %}
       </select>
-      <button class="btn btn-outline-primary">Actualizar estado</button>
+      <button class="btn btn-outline-primary mt-2">Actualizar estado</button>
     </form>
   </div>
 
   <div class="col-md-6">
     <h5>Prueba de entrega</h5>
     
-    {% if s.delivered_photo %}
+    {% if s.photo_url %}
         <div class="mb-3">
-            <img src="{{ s.delivered_photo if 'http' in s.delivered_photo else url_for('static', filename=s.delivered_photo) }}" 
+            <img src="{{ s.photo_url }}" 
                  alt="Prueba de entrega" 
                  class="img-fluid rounded shadow-sm border" 
                  style="max-width: 100%;">
         </div>
-        <p class="text-muted">
-            <i class="fas fa-calendar-check"></i> 
-            Entregado el: {{ s.delivered_at.strftime('%d/%m/%Y %H:%M') if s.delivered_at else 'Fecha no registrada' }}
+        <p class="text-success">
+            <i class="fas fa-check-circle"></i> 
+            Estado: <strong>{{ s.status }}</strong>
         </p>
     {% else %}
         <div class="alert alert-light border">
@@ -53,14 +52,13 @@
 
     <hr>
     
-  
-  <form action="{{ url_for('main.upload_photo', shipment_id=s.id) }}" method="POST" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label class="form-label">Seleccionar imagen:</label>
-        <input type="file" name="file" class="form-control" accept="image/*" required>
-    </div>
-    <button type="submit" class="btn btn-success w-100">Subir foto y marcar ENTREGADO</button>
-</form>
-  </div>
+    <form action="{{ url_for('main.upload_photo', shipment_id=s.id) }}" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Seleccionar imagen:</label>
+            <input type="file" name="file" class="form-control" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Subir foto y marcar ENTREGADO</button>
+    </form>
+  </div> 
 </div>
 {% endblock %}

@@ -69,8 +69,6 @@ def create_shipment():
     flash(f"Envío creado: {tracking_code}", "success")
     return redirect(url_for("main.dashboard"))
 
-# --- RUTAS DE EDICIÓN (ESTO ES LO QUE FALTA) ---
-
 @main_bp.get("/shipments/<int:shipment_id>/edit")
 @login_required
 def edit_shipment(shipment_id):
@@ -94,8 +92,6 @@ def update_shipment(shipment_id):
     flash("Envío actualizado.", "success")
     return redirect(url_for("main.dashboard"))
 
-# --- FIN RUTAS DE EDICIÓN ---
-
 @main_bp.route("/track", methods=["GET", "POST"])
 def track():
     query = request.form.get("query") if request.method == "POST" else request.args.get("code", "").strip()
@@ -117,13 +113,17 @@ def upload_photo(shipment_id):
     from .utils import upload_image_to_cloudinary
     s = Shipment.query.get_or_404(shipment_id)
     file = request.files.get('file')
-    if file:
+    if file and file.filename != '':
         url = upload_image_to_cloudinary(file)
         if url:
-            s.photo_url = url
+            s.photo_url = url  # Sincronizado con photo_url de models.py
             s.status = "ENTREGADO"
             db.session.commit()
-            flash("Foto subida.", "success")
+            flash("Foto subida y estado actualizado.", "success")
+        else:
+            flash("Error al subir imagen a la nube.", "danger")
+    else:
+        flash("No se seleccionó ningún archivo.", "warning")
     return redirect(url_for("main.shipment_detail", shipment_id=shipment_id))
 
 @main_bp.post("/shipments/<int:shipment_id>/delete")

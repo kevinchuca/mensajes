@@ -36,11 +36,13 @@ class Shipment(db.Model):
     status = db.Column(db.String(20), default="PENDIENTE", nullable=False)
     notes = db.Column(db.String(300))
     
-    # Campo para clientes sin cuenta (Simplificado)
+    # Campo para clientes sin cuenta
     client_name = db.Column(db.String(120)) 
 
-    # Campos para la entrega (Cloudinary y Fecha)
-    delivered_photo = db.Column(db.String(300))
+    # --- ATENCIÓN: SINCRONIZACIÓN DE NOMBRES ---
+    # Usamos 'photo_url' porque es el nombre que pusiste en tus rutas (s.photo_url)
+    # y en el comando ALTER TABLE de Render.
+    photo_url = db.Column(db.String(500)) 
     delivered_at = db.Column(db.DateTime)
 
     # Relaciones con usuarios existentes
